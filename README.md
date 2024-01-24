@@ -32,8 +32,12 @@ This is a web application for exploring artworks and museum-related information.
 - **Navigation:**
   - Use Next.js routing for seamless navigation between pages.
   - Implement navigation links using the `Link` component.
- 
-    
+
+## Hosting
+
+This web application is hosted on Vercel and you can access it through the link below:<br />
+[https://aryankhurana-museum-app.vercel.app](https://aryankhurana-museum-app.vercel.app)
+<br />
 
 ## Technologies and Libraries Used:
 - [React.js](https://react.dev)
