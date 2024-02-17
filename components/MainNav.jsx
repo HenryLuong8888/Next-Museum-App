@@ -66,7 +66,7 @@ export default function MainNav() {
         expanded={isExpanded}
       >
         <Container>
-          <Navbar.Brand>Aryan Khurana</Navbar.Brand>
+          <Navbar.Brand>Le Chanh Tin Luong</Navbar.Brand>
           <Navbar.Toggle
             onClick={() => setIsExpanded(!isExpanded)}
             aria-controls="navbarScroll"
