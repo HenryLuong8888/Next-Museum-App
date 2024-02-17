@@ -36,7 +36,7 @@ This is a web application for exploring artworks and museum-related information.
 ## Hosting
 
 This web application is hosted on Vercel and you can access it through the link below:<br />
-[https://aryankhurana-museum-app.vercel.app](https://aryankhurana-museum-app.vercel.app)
+[https://next-museum-app.vercel.app/](https://next-museum-app.vercel.app/)
 <br />
 
 ## Technologies and Libraries Used:
