@@ -1,69 +1,67 @@
-import React from "react";
 import { useAtom } from "jotai";
-import { searchHistoryAtom } from "../store";
 import { useRouter } from "next/router";
-import styles from '@/styles/History.module.css';
-import { Container, Card, ListGroup, Button } from "react-bootstrap";
+import { Card, ListGroup, Button } from "react-bootstrap";
+
+import { searchHistoryAtom } from "@/store";
+import styles from "@/styles/History.module.css";
 import { removeFromHistory } from "@/lib/userData";
 
-export default function SearchHistory() {
-  const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
+export default function History() {
   const router = useRouter();
-
-  if(!searchHistory) return null;
-
+  const [searchHistory, setSearchHistory] = useAtom(searchHistoryAtom);
   let parsedHistory = [];
-  searchHistory.forEach((h) => {
-    let params = new URLSearchParams(h);
+
+  function historyClicked(e, index) {
+    router.push(`/artwork?${searchHistory[index]}`);
+  }
+
+  async function removeHistoryClicked(e, index) {
+    e.stopPropagation();
+    setSearchHistory(await removeFromHistory(searchHistory[index]));
+  }
+
+  if (!searchHistory) return null;
+
+  searchHistory.forEach((history) => {
+    let params = new URLSearchParams(history);
     let entries = params.entries();
     parsedHistory.push(Object.fromEntries(entries));
   });
-
-  // This function must cause the user to navigate (using the "useRouter" hook) to the page
-  const historyClicked = (e, index) => {
-    router.push(`/artwork?${searchHistory[index]}`);
-  };
-
-  // The purpose of this function is to remove an element from the "searchHistory" list
-  async function removeHistoryClicked(e, index) {
-    e.stopPropagation(); // stop the event from trigging other events
-    setSearchHistory(await removeFromHistory(searchHistory[index]));
-  };
-
   return (
     <>
-      <Container>
-        {parsedHistory.length > 0 ? (
-          <>
-            <ListGroup>
-              {parsedHistory.map((historyItem, index) => (
-                <ListGroup.Item onClick={(e) => historyClicked(e, index)} className={styles.historyListItem} key={index}>
-                  {Object.keys(historyItem).map((key) => (
-                    <React.Fragment key={key}>
-                      {key}: <strong>{historyItem[key]}</strong>&nbsp;
-                    </React.Fragment>
-                  ))}
-                  <Button
-                    className="float-end"
-                    variant="danger"
-                    size="sm"
-                    onClick={(e) => removeHistoryClicked(e, index)}
-                  >
-                    &times;
-                  </Button>
-                </ListGroup.Item>
+      {parsedHistory.length > 0 ? (
+        <ListGroup>
+          {parsedHistory.map((historyItem, index) => (
+            <ListGroup.Item
+              className={styles.historyListItem}
+              key={index}
+              onClick={(e) => historyClicked(e, index)}
+            >
+              {console.log(historyItem)}
+
+              {Object.keys(historyItem).map((key, index) => (
+                <span key={index}>
+                  {key}: <strong>{historyItem[key]}</strong>&nbsp;
+                </span>
               ))}
-            </ListGroup>
-          </>
-        ) : (
-          <Card>
-            <Card.Body>
-              <h4>Nothing Here</h4>
-              <p>Try searching for some artwork</p>
-            </Card.Body>
-          </Card>
-        )}
-      </Container>
+              <Button
+                className="float-end"
+                variant="danger"
+                size="sm"
+                onClick={(e) => removeHistoryClicked(e, index)}
+              >
+                &times;
+              </Button>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      ) : (
+        <Card>
+          <Card.Body>
+            <h1>Nothing Here. Try searching for some artwork</h1>
+          </Card.Body>
+        </Card>
+      )}
     </>
   );
 }

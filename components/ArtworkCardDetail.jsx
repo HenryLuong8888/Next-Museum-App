@@ -1,65 +1,161 @@
-import React from 'react';
-import useSWR from 'swr';
-import Card from 'react-bootstrap/Card';
-import { useAtom } from 'jotai';
-import { favouritesAtom } from '@/store';
-import { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
-import Error from 'next/error';  
-import { addToFavourites, removeFromFavourites } from '@/lib/userData';
+import React, { useState, useEffect } from "react";
+import { Card, Button } from "react-bootstrap";
+import useSWR from "swr";
+import Error from "next/error";
+import { useAtom } from "jotai";
 
-export default function ArtworkCardDetail({ objectID }) {
-    // Get a reference to the favourites list
-    const [ favourites, setFavourites ] = useAtom(favouritesAtom);
-    // Changes button if the value is in favourites already
-    const [ showAdded, setShowAdded ] = useState(false);
+import { favouritesAtom } from "@/store";
+import { addToFavourites, removeFromFavourites } from "@/lib/userData";
 
-    // Make a call to the museum API using the objectID passed as props to this component
-    // Using conditional fetching: Use null or pass a function as key to conditionally fetch data. If the function throws or returns a falsy value, SWR will not start the request.
-    const { data, error } = useSWR(objectID ? `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectID}` : null);
+function ArtworkCardDetail({ objectID }) {
+  const [favouritesList, setFavouritesList] = useAtom(favouritesAtom);
+  const [showAdded, setShowAdded] = useState(false);
 
-    // pdate showAdded 
-    useEffect(()=>{
-        setShowAdded(favourites?.includes(objectID));
-    }, [favourites]);
-    
+  const { data, error } = useSWR(
+    objectID
+      ? `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectID}`
+      : null
+  );
 
-    // To be invoked when the button is clicked
-    async function favouritesClicked() {
-        // If the "showAdded" value in the state is true, then we must remove this piece of artwork from the favourites list.  
-        if (showAdded) {
-            setFavourites(await removeFromFavourites(objectID));
-        } else {
-            setFavourites(await addToFavourites(objectID));
-        }
-    }
-
-    // Throw an error if the API request fails
-    if (error) {
-        return <Error statusCode={404} />;
+  async function favouritesClicked() {
+    if (showAdded) {
+      setFavouritesList(await removeFromFavourites(objectID));
+      setShowAdded(false);
     } else {
-        // Validate the data
-        if (!data || data.length === 0) {
-            return null;
-        }
-        else {
-            return (
-                <Card className='hero-card' style={{ width: '18rem' }}>
-                    {data.primaryImageSmall && <Card.Img variant="top" src={data.primaryImage} />}
-                    <Card.Body>
-                        {data.title ? <Card.Title className='card-title'>{data.title}</Card.Title> : <Card.Title>N/A</Card.Title> }
-                        <Card.Text>
-                            {data.objectDate ? <p className='card-date'>{data.objectDate}</p> : <p>N/A</p> }
-                            {data.classification ? <p>{data.classification}</p> : <p>N/A</p> }
-                            {data.medium ? <p>{data.medium}</p> : <p>N/A</p> } <br /><br />
-                            {data.artistDisplayName ? <span><p>{data.artistDisplayName}</p><p><a href={data.artistWikidata_URL} target="_blank" rel="noreferrer">wiki</a></p></span> : <p>N/A</p> }
-                            {data.creditLine ? <p>{data.creditLine}</p> : <p>N/A</p> }
-                            {data.dimensions ? <p>{data.dimensions}</p> : <p>N/A</p> }
-                            {showAdded ? <Button onClick={favouritesClicked} variant='primary'>+ Favourite (added)</Button> : <Button onClick={favouritesClicked} variant='outline-primary'>+ Favourite</Button>}
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
-            );
-        }
+      setFavouritesList(await addToFavourites(objectID));
+      setShowAdded(true);
     }
+  }
+
+  useEffect(() => {
+    setShowAdded(favouritesList?.includes(objectID));
+  }, [favouritesList]);
+
+  if (data) {
+    return (
+      <>
+        <Card style={{ width: "80%", marginTop: "20px" }}>
+          {data.primaryImage && (
+            <div
+              style={{
+                height: "0",
+                paddingBottom: "80%",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <Card.Img
+                fluid
+                style={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  position: "absolute",
+                }}
+                variant="top"
+                src={data.primaryImageSmall}
+              />
+            </div>
+          )}
+
+          <Card.Body
+            style={{
+              display: "block",
+              position: "relative",
+              height: "100%",
+            }}
+          >
+            <Card.Title>
+              {data.title ? <span>{data.title}</span> : <h5>N/a</h5>}
+            </Card.Title>
+
+            <Card.Text>
+              {data.objectDate ? (
+                <span>
+                  <strong>Date: </strong>
+                  {data.objectDate}
+                </span>
+              ) : (
+                <span>
+                  <strong>Date: </strong>N/A
+                </span>
+              )}
+              <br />
+              {data.classification ? (
+                <span>
+                  <strong>Classification: </strong>
+                  {data.classification}
+                </span>
+              ) : (
+                <span>
+                  <strong>Classification: </strong>N/A
+                </span>
+              )}
+              <br />
+              {data.medium ? (
+                <span>
+                  <strong>Medium: </strong>
+                  {data.medium}
+                </span>
+              ) : (
+                <span>
+                  <strong>Medium: </strong>N/A
+                </span>
+              )}
+              <br />
+              <br />
+              {data.artistDisplayName ? (
+                <>
+                  <strong>Artist Name: </strong> {data.artistDisplayName}
+                  <a
+                    href={data.artistWikidata_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    ...wiki
+                  </a>
+                </>
+              ) : (
+                <span>
+                  <strong>Artist Name: </strong> N/A
+                </span>
+              )}
+              <br />
+              {data.creditLine ? (
+                <>
+                  <strong>Credit Line: </strong> {data.creditLine}
+                </>
+              ) : (
+                <span>
+                  <strong>Credit Line: </strong> N/A
+                </span>
+              )}
+              <br />
+              {data.dimensions ? (
+                <>
+                  <strong>Dimensions: </strong> {data.dimensions}
+                </>
+              ) : (
+                <span>
+                  <strong>Dimensions: </strong> N/A
+                </span>
+              )}
+            </Card.Text>
+
+            <Button
+              variant={showAdded ? "primary" : "outline-primary"}
+              onClick={() => favouritesClicked()}
+            >
+              {showAdded ? "+ Favourite (added)" : "+ Favourite"}
+            </Button>
+          </Card.Body>
+        </Card>
+      </>
+    );
+  } else if (error) {
+    return <Error statusCode={404} />;
+  } else {
+    return null;
+  }
 }
+
+export default ArtworkCardDetail;
