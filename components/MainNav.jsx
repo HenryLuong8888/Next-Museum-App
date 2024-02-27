@@ -54,7 +54,7 @@ export default function MainNav() {
         className="fixed-top navbar-dark bg-primary"
       >
         <Container fluid>
-          <Navbar.Brand>Anh Chien Vu</Navbar.Brand>
+          <Navbar.Brand>Le Chanh Tin Luong</Navbar.Brand>
           <Navbar.Toggle
             aria-controls="navbarScroll"
             onClick={() => setIsExpanded(!isExpanded)}
